@@ -2,22 +2,22 @@ const { prompt } = require('inquirer');
 const viewTable = require('./util');
 const db = require('../config/db');
 
-const viewRoles = () => {
-  viewTable('roles');
+const viewRoles = (cb) => {
+  viewTable('roles', cb);
 };
 
-const insertRole = ({ title, salary, departmentId }) => {
+const insertRole = ({ title, salary, departmentId }, cb) => {
   db.query(
     'INSERT INTO roles (title, salary, department_id) VALUES (?, ? ,?)',
     [title, salary, departmentId],
     (err, result) => {
       if (err) throw new Error(err);
-      viewRoles();
+      viewRoles(cb);
     }
   );
 };
 
-const promptRole = (departmentChoices) => {
+const promptRole = (departmentChoices, cb) => {
   prompt([
     {
       message: 'What is your role title?',
@@ -33,10 +33,10 @@ const promptRole = (departmentChoices) => {
       type: 'list',
       choices: departmentChoices,
     },
-  ]).then(insertRole);
+  ]).then((result) => insertRole(result, cb));
 };
 
-const addRole = () => {
+const addRole = (cb) => {
   db.query('SELECT * FROM departments', (err, result) => {
     if (err) throw new Error(err);
     const departmentChoices = result.map((department) => {
@@ -45,7 +45,7 @@ const addRole = () => {
         value: department.id,
       };
     });
-    promptRole(departmentChoices);
+    promptRole(departmentChoices, cb);
   });
 };
 

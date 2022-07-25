@@ -15,16 +15,17 @@ const getMainPromptChoices = () => {
     { name: 'Quit', value: 'quit' },
   ];
 };
-const mainPrompt = async () => {
-  const { choice } = await prompt([
+const mainPrompt = () => {
+  prompt([
     {
       message: 'What would you like to do?',
       type: 'list',
       choices: getMainPromptChoices(),
       name: 'choice',
     },
-  ]);
-  handleChoice(choice);
+  ]).then(({ choice }) => {
+    handleChoice(choice, mainPrompt);
+  });
 };
 
 const quit = () => {
@@ -42,11 +43,8 @@ const choiceMap = {
   quit,
 };
 
-const handleChoice = async (choice) => {
-  await choiceMap[choice]();
-  if (choice !== 'quit') {
-    mainPrompt();
-  }
+const handleChoice = (choice, cb) => {
+  choiceMap[choice](cb);
 };
 
-module.exports.mainPrompt = mainPrompt;
+module.exports = mainPrompt;

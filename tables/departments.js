@@ -2,24 +2,24 @@ const { prompt } = require('inquirer');
 const viewTable = require('./util');
 const db = require('../config/db');
 
-const insertDepartment = ({ name }) => {
+const viewDepartments = (cb) => {
+  viewTable('departments', cb);
+};
+
+const insertDepartment = ({ name }, cb) => {
   db.query('INSERT INTO departments (name) VALUES (?)', name, (err, result) => {
     if (err) throw new Error(err);
-    viewDepartments();
+    viewDepartments(cb);
   });
 };
 
-const addDepartment = () => {
+const addDepartment = (cb) => {
   prompt([
     {
       name: 'name',
       message: "What is your department's name?",
     },
-  ]).then(insertDepartment);
-};
-
-const viewDepartments = (cb) => {
-  viewTable('departments', cb);
+  ]).then((result) => insertDepartment(result, cb));
 };
 
 module.exports = {

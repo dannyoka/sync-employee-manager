@@ -2,22 +2,22 @@ const { prompt } = require('inquirer');
 const viewTable = require('./util');
 const db = require('../config/db');
 
-const viewEmployees = () => {
-  viewTable('employees');
+const viewEmployees = (cb) => {
+  viewTable('employees', cb);
 };
 
-const insertEmployee = ({ firstName, lastName, roleId, managerId }) => {
+const insertEmployee = ({ firstName, lastName, roleId, managerId }, cb) => {
   db.query(
     'INSERT INTO employees (first_name, last_name, role_id, manager_id) VALUES (?,?,?,?)',
     [firstName, lastName, roleId, managerId],
     (err, result) => {
       if (err) throw new Error(err);
-      viewEmployees();
+      viewEmployees(cb);
     }
   );
 };
 
-const promptEmployee = (roleChoices, managerChoices) => {
+const promptEmployee = (roleChoices, managerChoices, cb) => {
   prompt([
     {
       message: "What is your employee's first name?",
@@ -39,10 +39,10 @@ const promptEmployee = (roleChoices, managerChoices) => {
       name: 'managerId',
       choices: managerChoices,
     },
-  ]).then(insertEmployee);
+  ]).then((result) => insertEmployee(result, cb));
 };
 
-const addEmployee = () => {
+const addEmployee = (cb) => {
   db.query('SELECT * FROM employees', (err, employees) => {
     if (err) throw new Error(err);
     db.query('SELECT * FROM roles', (err, roles) => {
@@ -59,7 +59,7 @@ const addEmployee = () => {
           value: role.id,
         };
       });
-      promptEmployee(roleChoices, employeeChoices);
+      promptEmployee(roleChoices, employeeChoices, cb);
     });
   });
 };
